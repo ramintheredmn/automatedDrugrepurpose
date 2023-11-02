@@ -4,12 +4,15 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.webdriver.firefox.options import Options
 import pandas as pd
 import re
 
 
 def webScrape(smiles):
-    driver = webdriver.Firefox()
+    options = Options()
+    options.headless = True
+    driver = webdriver.Firefox(options=options)
     url = "http://www.swisssimilarity.ch/"
     wait = WebDriverWait(driver, 20)  # Increased wait time to 20 seconds
     driver.get(url)
