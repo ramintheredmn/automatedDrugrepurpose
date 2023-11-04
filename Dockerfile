@@ -13,7 +13,7 @@ RUN apt-get update && \
 COPY backend/req.txt ./
 
 # Install the Python dependencies
-RUN pip install --no-cache-dir -r req.txt
+RUN pip install -r req.txt
 
 # Copy the rest of the application code into the container
 COPY . .
