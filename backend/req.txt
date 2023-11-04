@@ -1,11 +1,10 @@
-fastapi
-uvicorn
+flask
+flask_cors
 selenium
 pandas
 numpy
 prody
 jupyter
-pylab
 rdkit
 chembl_webresource_client
 bs4
