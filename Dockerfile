@@ -7,6 +7,7 @@ WORKDIR /usr/src/app
 # Install OpenBabel
 RUN apt-get update && \
     apt-get install -y openbabel && \
+    apt-get install python3-pip && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy the requirements file into the container
