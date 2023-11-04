@@ -1,5 +1,5 @@
 # Start from a base Python 3.8 image
-FROM python:3.8-slim-buster
+FROM ubuntu
 
 # Set the working directory
 WORKDIR /usr/src/app
