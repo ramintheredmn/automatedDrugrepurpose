@@ -4,10 +4,9 @@ from rdkit import Chem
 from rdkit.Chem import PandasTools, AllChem
 import requests
 from bs4 import BeautifulSoup
-from chembletouni import chemble_to_uni
-from findpdb import get_pdb_with_best_resolution, get_all_pdb_entries
-from openbabel import run_openbabel
-import pybel
+from backend.chembletouni import chemble_to_uni
+from backend.findpdb import get_pdb_with_best_resolution, get_all_pdb_entries
+from backend.openbabel import run_openbabel
 from prody import *
 from pylab import *
 
