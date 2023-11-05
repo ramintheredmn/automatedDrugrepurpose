@@ -7,13 +7,7 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.firefox.options import Options
 import pandas as pd
 import re
-import sys
 
-class StreamToLogger(object):
-    def write(self, buf):
-        sys.stdout.write(buf)
-    def flush(self):
-        sys.stdout.flush()
 
 def webScrape(smiles):
     options = webdriver.FirefoxOptions()
