@@ -5,6 +5,7 @@ WORKDIR /usr/src/app
 RUN apt-get update && \
     apt-get install -y openbabel && \
     apt-get install -y python3-pip && \
+    apt-get install -y firefox && \
     rm -rf /var/lib/apt/lists/*
 
 COPY backend/req.txt ./
