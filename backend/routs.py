@@ -54,7 +54,7 @@ def handleSmiles(smilelast):
 
 def webScrape(smilelast, job_id):
     data = webScraping(smilelast)
-    df = pd.DataFrame.from_dict(data)
+    df = pd.DataFrame(data)
     results[job_id] = df
 
 @app.route('/api/results/<job_id>')

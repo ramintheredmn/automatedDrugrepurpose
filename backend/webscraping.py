@@ -12,6 +12,8 @@ import re
 def webScrape(smiles):
     options = webdriver.FirefoxOptions()
     options.add_argument('--headless')
+    options.add_argument('--no-sandbox')  # Required for running as root in Docker
+    options.add_argument('--disable-dev-shm-usage')
     driver = webdriver.Firefox(options=options)
 
     url = "http://www.swisssimilarity.ch/"
