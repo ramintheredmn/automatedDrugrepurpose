@@ -20,7 +20,7 @@ def webScrape(smiles):
     options = webdriver.FirefoxOptions()
     options.add_argument('--headless')
     # Initialize the WebDriver with the custom StreamToLogger as the log path
-    driver = webdriver.Firefox(options=options, service_log_path=StreamToLogger())
+    driver = webdriver.Firefox(options=options)
 
     url = "http://www.swisssimilarity.ch/"
     wait = WebDriverWait(driver, 20)  # Increased wait time to 20 seconds
