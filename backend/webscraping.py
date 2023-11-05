@@ -10,8 +10,8 @@ import re
 
 
 def webScrape(smiles):
-    options = Options()
-    options.headless = True
+    options = webdriver.FirefoxOptions()
+    options.add_argument('--headless')
     driver = webdriver.Firefox(options=options)
     url = "http://www.swisssimilarity.ch/"
     wait = WebDriverWait(driver, 20)  # Increased wait time to 20 seconds
@@ -29,7 +29,7 @@ def webScrape(smiles):
     submitButton = driver.find_element(By.ID, "submitButton")
     data = []
 
-    for i, radio in enumerate(radio_buttons):
+    for i, radio in enumerate(radio_buttons[0:2]):
         radio.click()
         submitButton.click()
         driver.implicitly_wait(30)

@@ -16,6 +16,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"; 
+import { ScrollArea } from '@/components/ui/scroll-area'
+
 
 const fetcher = (url: string) => axios.get(url).then(res => res.data)
 
@@ -27,6 +29,34 @@ function convertTargetData(data: any) {
   }));
   return rows;
 }
+
+
+function convertDrugsData(drugsData: any) {
+
+  if (drugsData == null) {
+    return [];
+  }
+  let { SMILES_ID, SMILES_data, Molecule_ID, Score } = drugsData;
+  let result = [];
+
+  // Iterate over the SMILES_ID keys since we're using it as the base
+  for (const key in SMILES_ID) {
+    // Ensure the key exists in the other properties before adding to the result
+    if (SMILES_data.hasOwnProperty(key) && Molecule_ID.hasOwnProperty(key) && Score.hasOwnProperty(key)) {
+      // Create an object for each entry with all data
+      let drugObj = {
+        id: key,
+        SMILES: SMILES_data[key],
+        moleculeId: Molecule_ID[key],
+        score: Score[key]
+      };
+      result.push(drugObj);
+    }
+  }
+
+  return result;
+}
+
 
 function convertPdbData(data: any) {
   if (!data.pdb_id) {
@@ -41,6 +71,11 @@ function convertPdbData(data: any) {
   }));
   return rows;
 }
+
+
+
+
+
 export default function Home() {
 const [target, setTarget] = useState("")
 const [starget, setStarget] = useState("")
@@ -49,6 +84,8 @@ const [targetInput, setTargetinput] = useState("")
 const [targetlast, setTargetlast] = useState("")
 const [pdb, setPdb] = useState("")
 const [spdb, setSpdb] = useState("")
+const [smileInput, setSmileInput] = useState("")
+const [smilelast, setSmilelast] = useState("")
 console.log(target)
 console.log(starget)
 
@@ -67,8 +104,20 @@ interface RowPdbData {
   num_chains: string
 }
 
+interface RowDrugsData {
+  id: string,
+  SMILES: string,
+  moleculeId: string,
+  score: string
 
-const {data: targetData, error: targetError, isLoading: targetLoading} = useSWR(starget&&`/api/target/${starget}`, fetcher)
+}
+
+
+const {data: targetData, error: targetError, isLoading: targetLoading} = useSWR(!smilelast?starget&&`/api/target/${starget}`:null, fetcher, {
+  revalidateIfStale: false,
+  revalidateOnFocus: false,
+  revalidateOnReconnect: false
+})
 const [rowTargetData, setRowTargetData] = useState<RowTargetData[]>([]);
 console.log(targetData)
   useEffect(() => {
@@ -78,15 +127,77 @@ console.log(targetData)
     }
   }, [targetData]);
 
-const {data: pdbsData, error: pdbsError, isLoading: pdbsLoading} = useSWR(targetlast&& `/api/${starget}/pdb/${targetlast}`, fetcher)
+const {data: pdbsData, error: pdbsError, isLoading: pdbsLoading} = useSWR(!smilelast?targetlast&& `/api/${starget}/pdb/${targetlast}`: null, fetcher, {
+  revalidateIfStale: false,
+
+})
 console.log(pdbsData)
 const [rowPdbData, setRowPdbData] = useState<RowPdbData[]>([]);
 console.log(rowPdbData)
 
 
 
-const{data: pdbData, error: pdbError, isLoading: pdbLoading} = useSWR(spdb &&  `/api/pdb/${spdb}`, fetcher)
+const{data: pdbData, error: pdbError, isLoading: pdbLoading} = useSWR(!smilelast? spdb &&  `/api/pdb/${spdb}`: null, fetcher, {
+  revalidateIfStale: false,
+  revalidateOnFocus: false,
+  revalidateOnReconnect: false
+})
+
 console.log(pdbData)
+
+const [drugs, setDrugs] = useState(null)
+const [jobId, setJobId] = useState(null);
+
+useEffect(() => {
+  if (smilelast) {
+    // Trigger the processing
+    axios.get(`/api/smiles/${smilelast}`)
+      .then(response => {
+        setJobId(response.data.job_id);
+      })
+      .catch(error => {
+        console.error('Error triggering processing:', error);
+      });
+  }
+}, [smilelast]);
+
+useEffect(() => {
+  if (jobId) {
+    // Poll the server for the result
+    const intervalId = setInterval(() => {
+      axios.get(`/api/results/${jobId}`)
+        .then(response => {
+          if (response.status === 200) {
+            clearInterval(intervalId);  // Stop polling once a result is received
+            setDrugs(response.data);
+          }
+        })
+        .catch(error => {
+          clearInterval(intervalId);  // Stop polling on error
+          console.error('Error fetching result:', error);
+        });
+    }, 5000);  // Poll every 5 seconds
+
+    return () => clearInterval(intervalId);  // Clear the interval when the component is unmounted
+  }
+}, [jobId]);
+
+const [rowDrugs, setRowdrugs] = useState<RowDrugsData[]>([])
+
+useEffect(() => {
+  if (drugs) {
+    let drugrows = convertDrugsData(drugs);
+
+    // Sort by score if necessary (after converting string score to float)
+    drugrows.sort((a, b) => parseFloat(b.score) - parseFloat(a.score)); // Assuming higher score is better
+
+    setRowdrugs(drugrows);
+  }
+}, [drugs]);
+
+// Rest of your component
+
+
 
 useEffect(() => {
   if (pdbsData) {
@@ -119,8 +230,7 @@ useEffect(() => {
   }
 }, [pdbsData]);
 
-
-
+console.log(convertDrugsData(drugs))
 let targetcontent;
 targetLoading?  targetcontent = <div>Loading...</div> : null
 targetError? targetcontent =  <div>Error: {targetError.message}</div> : null
@@ -128,19 +238,24 @@ targetError? targetcontent =  <div>Error: {targetError.message}</div> : null
 let pdbcontent;
 pdbsLoading?  pdbcontent = <div>Loading...</div> : null
 pdbsError? pdbcontent =  <div>Error: {pdbsError.message}</div> : null
-
+console.log(drugs)
+console.log(rowDrugs)
   return (
-    <main className="flex min-h-screen flex-col items-center  p-24">
-        <Tabs defaultValue="etarget" className="flex flex-col w-3/4">
-          <TabsList>
+    <main className="flex h-3/4 max-w-screen flex-col items-center font-serif">
+        <Tabs defaultValue="etarget" className=" p-10 flex flex-col overflow-x-visible">
+          
+          <TabsList className=' font-extralight border-black'>
+            <ScrollArea className='border-black'>
             <TabsTrigger value="etarget">Enter Target</TabsTrigger>
             <TabsTrigger value="ctarget">choose one</TabsTrigger>
             <TabsTrigger value="cpdb">Choose pdb</TabsTrigger>
             <TabsTrigger value="ligands">Select ligands</TabsTrigger>
+            <TabsTrigger value='drugs'>result</TabsTrigger>
+            </ScrollArea>
           </TabsList>
           <TabsContent value="etarget">
-            <div className='flex flex-col items-center space-y-3 mt-3'>
-            <h1>Enter the desired target name </h1>
+            <div className='mt-4 flex flex-col'>
+            <p className='text-center'>Enter target name </p>
             <Input className='w-25 border-slate-950' placeholder='Enter target' value={target} onChange={(e)=> setTarget(e.target.value)}/>
             <Button className="flex-none" size={'sm'}
             onClick={()=> setStarget(target)}
@@ -149,7 +264,7 @@ pdbsError? pdbcontent =  <div>Error: {pdbsError.message}</div> : null
           
           
           </TabsContent>
-          <TabsContent value="ctarget">
+          <TabsContent className=" flex flex-col itmes-center mt-4" value="ctarget">
 
 
             {starget? 
@@ -157,12 +272,13 @@ pdbsError? pdbcontent =  <div>Error: {pdbsError.message}</div> : null
             targetcontent?
             targetcontent
             :
-            <Table>
+            
+            <Table className=''>
             <TableCaption>Enter the desired target id</TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead>ID</TableHead>
-                <TableHead className="w-[200px]">Organism</TableHead>
+                <TableHead className="">Organism</TableHead>
                 <TableHead>Preferred Name</TableHead>
                 <TableHead>Target ChEMBL ID</TableHead>
               </TableRow>
@@ -171,8 +287,8 @@ pdbsError? pdbcontent =  <div>Error: {pdbsError.message}</div> : null
                   {rowTargetData.map((row, index) => (
                     <TableRow key={index}>
                       <TableCell>{index}</TableCell>
-                      <TableCell className="font-medium">{row.organism}</TableCell>
-                      <TableCell>{row.pref_name}</TableCell>
+                      <TableCell>{row.organism}</TableCell>
+                      <TableCell className='w-5'>{row.pref_name}</TableCell> 
                       <TableCell>{row.target_chembl_id}</TableCell>
                     </TableRow>
                   ))}
@@ -180,7 +296,7 @@ pdbsError? pdbcontent =  <div>Error: {pdbsError.message}</div> : null
           </Table>
 
           : 
-          <div className="flex items-center">Enter target name</div>
+          <div className="flex flex-col items-center border-black">first fill the pervious tab</div>
           
           }
 
@@ -194,7 +310,7 @@ pdbsError? pdbcontent =  <div>Error: {pdbsError.message}</div> : null
 
 
           </TabsContent>
-          <TabsContent value="cpdb">
+          <TabsContent className='flex flex-col items-center mt-4' value="cpdb">
 
           {targetlast ?
 
@@ -206,7 +322,7 @@ pdbsError? pdbcontent =  <div>Error: {pdbsError.message}</div> : null
                 <TableHeader>
                   <TableRow>
                     <TableHead>ID</TableHead>
-                    <TableHead className="w-[200px]">pdb id</TableHead>
+                    <TableHead >pdb id</TableHead>
                     <TableHead>method</TableHead>
                     <TableHead>resolution</TableHead>
                     <TableHead>length</TableHead>
@@ -238,6 +354,76 @@ pdbsError? pdbcontent =  <div>Error: {pdbsError.message}</div> : null
             <Button onClick={()=> setSpdb(pdb)}>submit</Button>
           </section>
 
+          </TabsContent>
+          <TabsContent value='ligands'>
+
+            <section>
+
+
+              {pdbLoading?
+              
+              <div className="flex items-center">Loading...</div>
+            
+              :
+
+              <div className=' flex flex-col items-center'>
+
+                {pdbData&&Object?.keys(pdbData).map(key => (
+                  <div className='flex flex-wrap' key={key}>
+                    <strong className='font-mono'>{key}: &nbsp; </strong> <h1 className=' text-black'>{pdbData[key]}</h1>
+                  </div>
+                ))}
+              </div>
+
+
+
+              }
+
+              <div className='mt-6 flex flex-col items-center space-y-2'>
+                <p> Enter the smiles </p>
+                <Input className='border-black'
+                  onChange={(e)=> setSmileInput(e.target.value)}
+                  ></Input>
+                <Button onClick={()=> setSmilelast(smileInput)}>Submit</Button>
+              </div>
+            </section>
+
+          </TabsContent>
+          <TabsContent value='drugs'>
+              <div className="mt-4 flex flex-col items-center">
+                {smilelast?
+
+                !drugs?
+                  <div>Loading... <br></br> This might take upto 20 mins</div>
+                  :
+
+                  <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>id</TableHead>
+                      <TableHead >smiles</TableHead>
+                      <TableHead>score</TableHead>
+
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {rowDrugs.map((row, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{row.id}</TableCell>
+
+                        <TableCell>{row.SMILES}</TableCell>
+                        <TableCell>{row.score}</TableCell>
+                        <TableCell className='font-bold'>{row.score}</TableCell>
+
+  
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              :
+              'enter smile'
+              }
+              </div>
           </TabsContent>
         </Tabs>
 

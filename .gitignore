@@ -4,7 +4,9 @@ venv/
 client/node_modules
 client/.pnp
 .pnp.js
-
+*.pdb
+*.smi
+*.gz
 # testing
 client/coverage
 
