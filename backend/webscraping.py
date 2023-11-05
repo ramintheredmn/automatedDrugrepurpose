@@ -9,7 +9,6 @@ import pandas as pd
 import re
 import sys
 
-# Custom class to enable logging to console
 class StreamToLogger(object):
     def write(self, buf):
         sys.stdout.write(buf)
@@ -19,7 +18,6 @@ class StreamToLogger(object):
 def webScrape(smiles):
     options = webdriver.FirefoxOptions()
     options.add_argument('--headless')
-    # Initialize the WebDriver with the custom StreamToLogger as the log path
     driver = webdriver.Firefox(options=options)
 
     url = "http://www.swisssimilarity.ch/"
