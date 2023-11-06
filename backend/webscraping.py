@@ -37,7 +37,7 @@ def webScrape(smiles):
     submitButton = driver.find_element(By.ID, "submitButton")
     data = []
 
-    for i, radio in enumerate(radio_buttons[0:2]):
+    for i, radio in enumerate(radio_buttons):
         radio.click()
         submitButton.click()
         driver.implicitly_wait(30)
