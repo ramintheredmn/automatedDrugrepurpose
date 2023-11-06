@@ -2,19 +2,24 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager import ChromeDriverManager
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
-from selenium.webdriver.firefox.options import Options
 import pandas as pd
 import re
 
 
 def webScrape(smiles):
-    options = webdriver.FirefoxOptions()
-    options.add_argument('--headless')
-    options.add_argument('--no-sandbox')  # Required for running as root in Docker
+
+    options = Options()
+    options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
-    driver = webdriver.Firefox(options=options)
+    options.add_argument('--disable-gpu')
+    options.add_argument('--headless')
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
 
     url = "http://www.swisssimilarity.ch/"
     wait = WebDriverWait(driver, 20)  # Increased wait time to 20 seconds
@@ -32,7 +37,7 @@ def webScrape(smiles):
     submitButton = driver.find_element(By.ID, "submitButton")
     data = []
 
-    for i, radio in enumerate(radio_buttons):
+    for i, radio in enumerate(radio_buttons[0:2]):
         radio.click()
         submitButton.click()
         driver.implicitly_wait(30)
