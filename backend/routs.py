@@ -18,20 +18,28 @@ def index():
 def get_target(target_name):
     targets = target(target_name)
     query_pd = pd.DataFrame.from_dict(targets)
+    query_pd = query_pd[query_pd['target_chembl_id'].apply(lambda x: len(str(x)) == 10)]
     return query_pd.to_json()
 
 @app.route('/api/<target_name>/pdb/<targetLast>')
 def handle_target(target_name, targetLast):
     targets = target(target_name)
-    query_pd = pd.DataFrame.from_dict(targets)    
+    query_pd = pd.DataFrame.from_dict(targets)
+    query_pd = query_pd[query_pd['target_chembl_id'].apply(lambda x: len(str(x)) == 10)]  
     targetN = query_pd.iloc[int(targetLast)]
+    print(targetN)
     mych = str(targetN['target_chembl_id'])
     uni = chemble_to_uni(mych)
-    pdbs = get_all_pdb_entries(uni)
-    df = pd.DataFrame(pdbs)
-    df['resolution'] = df['resolution'].astype(str)
-    df['length'] = df['length'].astype(str)
-    df['num_chains'] = df['num_chains'].astype(str)
+    try:
+        pdbs = get_all_pdb_entries(uni)
+        df = pd.DataFrame(pdbs)
+        
+        df['resolution'] = df['resolution'].astype(str)
+        df['length'] = df['length'].astype(str)
+        df['num_chains'] = df['num_chains'].astype(str)
+    except KeyError:
+        return 'No results for target', 202  # Return a 202 Accepted
+
     return df.to_json()
 
 @app.route('/api/pdb/<pdb>')

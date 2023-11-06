@@ -86,8 +86,7 @@ const [pdb, setPdb] = useState("")
 const [spdb, setSpdb] = useState("")
 const [smileInput, setSmileInput] = useState("")
 const [smilelast, setSmilelast] = useState("")
-console.log(target)
-console.log(starget)
+
 
 
 interface RowTargetData {
@@ -131,9 +130,9 @@ const {data: pdbsData, error: pdbsError, isLoading: pdbsLoading} = useSWR(!smile
   revalidateIfStale: false,
 
 })
-console.log(pdbsData)
+
 const [rowPdbData, setRowPdbData] = useState<RowPdbData[]>([]);
-console.log(rowPdbData)
+
 
 
 
@@ -143,7 +142,7 @@ const{data: pdbData, error: pdbError, isLoading: pdbLoading} = useSWR(!smilelast
   revalidateOnReconnect: false
 })
 
-console.log(pdbData)
+
 
 const [drugs, setDrugs] = useState(null)
 const [jobId, setJobId] = useState(null);
@@ -195,26 +194,22 @@ useEffect(() => {
   }
 }, [drugs]);
 
-// Rest of your component
-
-
 
 useEffect(() => {
   if (pdbsData) {
     let pdbrows = convertPdbData(pdbsData);
 
-    // Sort by lowest resolution and then by highest length if resolutions are equal,
-    // placing rows with NaN values at the end
+    
     pdbrows.sort((a, b) => {
-      // Parse resolution and length as floats for accurate comparison
+      
       const resolutionA = parseFloat(a.resolution);
       const resolutionB = parseFloat(b.resolution);
       const lengthA = parseFloat(a.length);
       const lengthB = parseFloat(b.length);
 
-      // Check for NaN values and sort accordingly
-      if (isNaN(resolutionA)) return 1;  // Place a at the end if its resolution is NaN
-      if (isNaN(resolutionB)) return -1;  // Place b at the end if its resolution is NaN
+      
+      if (isNaN(resolutionA)) return 1;
+      if (isNaN(resolutionB)) return -1; 
       if (lengthA > lengthB) return -1;
       if (lengthA < lengthB) return 1;
 
@@ -412,7 +407,7 @@ console.log(rowDrugs)
                         <TableCell>{row.id}</TableCell>
 
                         <TableCell>{row.SMILES}</TableCell>
-                        <TableCell>{row.score}</TableCell>
+                        
                         <TableCell className='font-bold'>{row.score}</TableCell>
 
   
