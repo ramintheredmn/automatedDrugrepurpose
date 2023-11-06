@@ -2,6 +2,7 @@ flask
 flask_cors
 gunicorn
 selenium
+webdriver_manager
 pandas
 numpy
 prody
