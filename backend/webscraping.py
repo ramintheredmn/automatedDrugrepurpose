@@ -78,7 +78,7 @@ def webScrape(smiles):
                     smiles_match = re.search(r'SMILES\["(.*?)"\]="(.*?)"', script_text)
                     # print(smiles_match)
                     if smiles_match:
-                        smiles_data = smiles_match.group(2)
+                        # smiles_data = smiles_match.group(2)
 
                         td_elements = tr.find_elements(
                             By.CSS_SELECTOR, "td[align='left'][valign='top']"
@@ -91,10 +91,10 @@ def webScrape(smiles):
 
                             data.append(
                                 {
-                                    "smile_match": smiles_match.group(1),
+                                    # "smile_match": smiles_match.group(1),
                                     "Phase": current_phase,
                                     "S_method": methods[int(current_method)],
-                                    "SMILES_data": smiles_data,
+                                    # "SMILES_data": smiles_data,
                                     "Molecule_ID": molecule_id,
                                     "Score": score,
                                 }
