@@ -37,7 +37,7 @@ def webScrape(smiles):
     radio_buttons = driver.find_elements(By.CSS_SELECTOR, "input[type='radio']")
     submitButton = driver.find_element(By.ID, "submitButton")
     data = []
-    methods = [
+    methods = 3 * [
         "2D - FP2",
         "2D - ECFP4",
         "2D - MHFP6",
@@ -49,9 +49,10 @@ def webScrape(smiles):
         "3D - E3FP",
         "2D & 3D combined",
     ]
-
+    
     for i, radio in enumerate(radio_buttons[17:]):
-        # print("the radio button is : ", radio.get_attribute("value"), f"the index is : {i}", "the method is : ", methods[i])
+        
+        print("the radio button is : ", radio.get_attribute("value"), f"the index is : {i}", "the method is : ", methods[i])
         radio.click()
         submitButton.click()
         driver.implicitly_wait(30)
@@ -89,13 +90,7 @@ def webScrape(smiles):
 
                             data.append(
                                 {
-                                    "Phase": "clinical_candidate"
-                                    if (str(radio.get_attribute("value")))[:-4]
-                                    == "CHEMBL_clinic"
-                                    else "approved",
-                                    "S_method": methods[
-                                        int(radio.get_attribute("value")[-1])
-                                    ],
+                                    "method": methods[i],
                                     "SMILES_data": smiles_data,
                                     "Molecule_ID": molecule_id,
                                     "Score": score,
