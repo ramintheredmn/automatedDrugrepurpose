@@ -34,7 +34,7 @@ def webScrape(smiles):
     )
     dropdown.select_by_visible_text("Drugs")
 
-    radio_buttons = driver.find_elements(By.CSS_SELECTOR, "input[type='radio']")
+    radio_buttons: list = driver.find_elements(By.CSS_SELECTOR, "input[type='radio']")
     submitButton = driver.find_element(By.ID, "submitButton")
     data = []
     methods = [
@@ -76,7 +76,7 @@ def webScrape(smiles):
                         "innerHTML"
                     )
                     smiles_match = re.search(r'SMILES\["(.*?)"\]="(.*?)"', script_text)
-
+                    # print(smiles_match)
                     if smiles_match:
                         smiles_data = smiles_match.group(2)
 
@@ -91,7 +91,8 @@ def webScrape(smiles):
 
                             data.append(
                                 {
-                                   "Phase": current_phase,
+                                    "smile_match": smiles_match.group(1),
+                                    "Phase": current_phase,
                                     "S_method": methods[int(current_method)],
                                     "SMILES_data": smiles_data,
                                     "Molecule_ID": molecule_id,
