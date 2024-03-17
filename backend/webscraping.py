@@ -50,8 +50,10 @@ def webScrape(smiles):
         "2D & 3D combined",
     ]
 
-    for i, radio in enumerate(radio_buttons[17:]):
+    for i, radio in enumerate(radio_buttons[11:]):
         # print("the radio button is : ", radio.get_attribute("value"), f"the index is : {i}", "the method is : ", methods[i])
+        current_phase = radio.get_attribute("value")[:-4]
+        current_method = radio.get_attribute("value")[-1]
         radio.click()
         submitButton.click()
         driver.implicitly_wait(30)
@@ -89,13 +91,8 @@ def webScrape(smiles):
 
                             data.append(
                                 {
-                                    "Phase": "clinical_candidate"
-                                    if (str(radio.get_attribute("value")))[:-4]
-                                    == "CHEMBL_clinic"
-                                    else "approved",
-                                    "S_method": methods[
-                                        int(radio.get_attribute("value")[-1])
-                                    ],
+                                   "Phase": current_phase,
+                                    "S_method": methods[int(current_method)],
                                     "SMILES_data": smiles_data,
                                     "Molecule_ID": molecule_id,
                                     "Score": score,
